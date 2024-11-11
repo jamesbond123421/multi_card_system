@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            background-image: url('background.jpeg');
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .title {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ff87b4;
+        }
+        .message {
+            font-size: 16px;
+            color: lightgray;
+            margin-bottom: 20px;
+        }
+        .input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            background-color: #ffffff;
+            color: #333;
+            font-size: 14px;
+        }
+        .submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff87b4;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .submit:hover {
+            background-color: #e76a99;
+        }
+        .signin {
+            margin-top: 20px;
+            color: lightgray;
+            font-size: 14px;
+        }
+        .signin a {
+            color: #ff87b4;
+            text-decoration: none;
+        }
+        .signin a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <p class="title">Create Account</p>
+        <p class="message">Sign up now to access your multi-currency credit manager</p>
+
+        <!-- Signup form -->
+        <form onsubmit="redirectToAccount(event)">
+            <label>
+                <input id="firstname" class="input" type="text" placeholder="First Name" required>
+            </label>
+            <label>
+                <input id="lastname" class="input" type="text" placeholder="Last Name" required>
+            </label>
+            <label>
+                <input class="input" type="email" placeholder="Email" required>
+            </label>
+            <label>
+                <input class="input" type="password" placeholder="Password" required>
+            </label>
+            <label>
+                <input class="input" type="password" placeholder="Confirm Password" required>
+            </label>
+            <button class="submit" type="submit">Sign Up</button>
+        </form>
+
+        <!-- Sign-in link for existing users -->
+        <p class="signin">Already have an account? <a href="signin.html">Sign In</a></p>
+    </div>
+
+    <script>
+        function redirectToAccount(event) {
+            event.preventDefault();
+            const firstname = document.getElementById('firstname').value;
+            const lastname = document.getElementById('lastname').value;
+
+            // Save the name to localStorage
+            localStorage.setItem('firstname', firstname);
+            localStorage.setItem('lastname', lastname);
+
+            // Redirect to index.html
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

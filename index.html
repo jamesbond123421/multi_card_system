@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Currency Credit Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.0.0/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('images/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .custom-title {
+            color: #db346c;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-btn {
+            background-color: #f8f8f8;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        .tab-btn.active {
+            background-color: #db346c;
+            color: white;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+        }
+        #userImage {
+            width: 50px;  /* Adjust size here */
+            height: 50px; /* Adjust size here */
+            border-radius: 50%;  /* Circle shape */
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            border: 2px solid white;  /* Optional: adds a border to the image */
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Upload button styles */
+        #uploadImage {
+            position: absolute;
+            top: 75px;
+            right: 20px;
+            opacity: 0;  /* Make the input field invisible */
+            cursor: pointer;
+        }
+        #userImageContainer {
+            position: relative;
+        }
+         
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
+        <div class="text-center">
+            <h2 id="greeting" class="text-xl font-semibold custom-title"></h2>
+            <h1 class="text-2xl font-bold custom-title">Multi-Currency Credit Manager</h1>
+            <p class="text-gray-600">Manage your multi-currency wallets and cards</p>
+        </div>
+
+        <div class="mt-6 mb-4">
+            <div id="remaining-credit" class="bg-primary text-primary-foreground p-4 rounded-md">
+                <div class="flex items-center space-x-2">
+                    <span class="font-semibold">Remaining Credit:</span>
+                    <span id="remaining-amount" class="text-xl font-bold">$10,000.00 USD</span>
+                </div>
+            </div>
+        </div>
+        <div id="personalizedImage">
+            <img src="" alt="Image" id="userImage" onclick="triggerFileInput()" />
+        </div>
+          <input type="file" id="uploadImage" accept="image/*" onchange="uploadProfileImage()" />
+          <div class="text-right mt-4">
+            <button onclick="logout()" class="bg-red-500 text-white p-2 rounded-md">Logout</button>
+        </div>
+
+        <div class="tabs">
+            <div class="tabs-header flex justify-between mb-4">
+                <button class="tab-btn active" onclick="switchTab(event, 'wallets')">Wallets</button>
+                <button class="tab-btn" onclick="switchTab(event, 'cards')">Cards</button>
+                <button class="tab-btn" onclick="switchTab(event, 'addCard')">Add Card</button>
+                <button class="tab-btn" onclick="switchTab(event, 'charge')">Charge</button>
+                <button class="tab-btn" onclick="switchTab(event, 'convert')">Convert</button>
+            </div>
+
+            <!-- Wallets Tab -->
+            <div class="tab-content active" id="wallets">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" id="wallets-container">
+                    <!-- Wallets will be added dynamically here -->
+                </div>
+            </div>
+
+            <!-- Cards Tab -->
+            <div class="tab-content" id="cards">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" id="cards-container">
+                    <!-- Cards will be added dynamically here with remove option -->
+                </div>
+            </div>
+
+            <!-- Add Card Tab -->
+            <div class="tab-content" id="addCard">
+                <div class="space-y-4">
+                    <label for="cardName">Card Name</label> <br>
+                    <input type="text" id="cardName" class="w-full p-2 border rounded-md" placeholder="Card Name">
+                    <label for="cardNumber">Card Number</label> <br>
+                    <input type="text" id="cardNumber" class="w-full p-2 border rounded-md" placeholder="Card Number">
+                    <label for="expiryDate">Expiry Date:</label>
+                    <input type="month" id="expiryDate" name="expiryDate" required><br>
+                    <label for="cvv">CVV:</label>
+                    <input type="text" id="cvv" name="cvv" pattern="\d{3}" title="Enter a 3-digit CVV" required><br>
+
+                    <label for="cardCurrency">Currency</label> <br>
+                    <select id="cardCurrency" class="w-full p-2 border rounded-md">
+                        <option value="USD">USD</option>
+                        <option value="NGN">NGN</option>
+                        <option value="GHS">GHS</option>
+                    </select>
+                    <button onclick="addCard()" class="bg-blue-500 text-white p-2 rounded-md">Add Card</button>
+                </div>
+            </div>
+
+            <!-- Charge Tab -->
+            <div class="tab-content" id="charge">
+                <div class="space-y-4">
+                    <label for="chargeAmount">Charge Amount</label> <br>
+                    <input type="number" id="chargeAmount" class="w-full p-2 border rounded-md" placeholder="Enter amount"><br>
+                    <label for="chargeCard">Select Card to Charge</label> <br>
+                    <select id="chargeCard" class="w-full p-2 border rounded-md">
+                        <!-- Cards will be populated dynamically here -->
+                    </select>
+                    <button onclick="chargeCard()" class="bg-green-500 text-white p-2 rounded-md">Charge</button>
+                    <div id="error-message" class="error-message mt-2"></div>
+                </div>
+            </div>
+
+            <!-- Convert Tab -->
+            <div class="tab-content" id="convert">
+                <div class="space-y-4">
+                    <label for="convertAmount">Amount</label>
+                    <input type="number" id="convertAmount" class="w-full p-2 border rounded-md" placeholder="Enter amount">
+                    <label for="convertFrom">From</label>
+                    <select id="convertFrom" class="w-full p-2 border rounded-md">
+                        <option value="USD">USD</option>
+                        <option value="NGN">NGN</option>
+                        <option value="GHS">GHS</option>
+                    </select>
+                    <label for="convertTo">To</label>
+                    <select id="convertTo" class="w-full p-2 border rounded-md">
+                        <option value="USD">USD</option>
+                        <option value="NGN">NGN</option>
+                        <option value="GHS">GHS</option>
+                    </select>
+                    <button onclick="convertCurrency()" class="bg-yellow-500 text-white p-2 rounded-md">Convert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+         src="personalizedImage.js"
+        // Sample wallets data
+        const wallets = [
+            { currency: 'USD', balance: 3000 },
+            { currency: 'NGN', balance: 13800 },
+            { currency: 'GHS', balance: 3450 }
+        ];
+
+        let cards = [
+            { id: '1', name: 'Naira Card', number: '**** **** **** 1234', currency: 'NGN', balance: 5000 },
+            { id: '2', name: 'Cedis Card', number: '**** **** **** 5678', currency: 'GHS', balance: 2000 }
+        ];
+
+        function updateWallets() {
+            const walletsContainer = document.getElementById('wallets-container');
+            walletsContainer.innerHTML = ''; // Clear existing content
+            wallets.forEach(wallet => {
+                const walletCard = document.createElement('div');
+                walletCard.classList.add('bg-white', 'shadow-md', 'p-4', 'rounded-lg');
+                walletCard.innerHTML = `
+                    <h3 class="font-semibold">${wallet.currency} Wallet</h3>
+                    <p class="text-xl font-bold">${wallet.balance.toFixed(2)}</p>
+                `;
+                walletsContainer.appendChild(walletCard);
+            });
+        }
+
+        function updateCards() {
+            const cardsContainer = document.getElementById('cards-container');
+            const chargeCardSelect = document.getElementById('chargeCard');
+            cardsContainer.innerHTML = '';
+            chargeCardSelect.innerHTML = '';
+
+            cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('bg-white', 'shadow-md', 'p-4', 'rounded-lg');
+                cardElement.innerHTML = `
+                    <h3 class="font-semibold">${card.name} (${card.currency})</h3>
+                    <p class="text-xl font-bold">${card.balance.toFixed(2)}</p>
+                    <button onclick="removeCard('${card.id}')" class="text-red-500">Remove</button>
+                `;
+                cardsContainer.appendChild(cardElement);
+
+                const option = document.createElement('option');
+                option.value = card.id;
+                option.innerText = `${card.name} (${card.currency})`;
+                chargeCardSelect.appendChild(option);
+            });
+        }
+
+        function addCard() {
+            const cardName = document.getElementById('cardName').value;
+            const cardNumber = document.getElementById('cardNumber').value;
+            const cardCurrency = document.getElementById('cardCurrency').value;
+
+            if (cardName && cardNumber && cardCurrency) {
+                const newCard = {
+                    id: (cards.length + 1).toString(),
+                    name: cardName,
+                    number: cardNumber,
+                    currency: cardCurrency,
+                    balance: 1000
+                };
+                cards.push(newCard);
+                updateCards();
+                switchTab(null, 'cards');
+            }
+        }
+
+        function removeCard(id) {
+            cards = cards.filter(card => card.id !== id);
+            updateCards();
+        }
+
+        function chargeCard() {
+            const chargeAmount = parseFloat(document.getElementById('chargeAmount').value);
+            const selectedCardId = document.getElementById('chargeCard').value;
+            const selectedCard = cards.find(card => card.id === selectedCardId);
+            const wallet = wallets.find(wallet => wallet.currency === selectedCard.currency);
+
+            if (!selectedCard || isNaN(chargeAmount) || chargeAmount <= 0) {
+                document.getElementById('error-message').innerText = 'Invalid charge amount.';
+                return;
+            }
+
+            if (selectedCard.balance >= chargeAmount) {
+                selectedCard.balance -= chargeAmount;
+                wallet.balance += chargeAmount;
+                calculateRemainingCreditLimit();
+                updateWallets();
+                updateCards();
+                document.getElementById('error-message').innerText = '';
+            } else {
+                document.getElementById('error-message').innerText = 'Insufficient card balance.';
+            }
+        }
+
+        function convertCurrency() {
+            const convertAmount = parseFloat(document.getElementById('convertAmount').value);
+            const convertFrom = document.getElementById('convertFrom').value;
+            const convertTo = document.getElementById('convertTo').value;
+            const EXCHANGE_RATES = {
+                USD: 1,
+                NGN: 1687.41,
+                GHS: 16.49
+            };
+
+            if (convertFrom === convertTo || isNaN(convertAmount) || convertAmount <= 0) {
+                alert('Please enter a valid conversion amount and select different currencies.');
+                return;
+            }
+
+            const convertedAmount = (convertAmount / EXCHANGE_RATES[convertFrom]) * EXCHANGE_RATES[convertTo];
+            alert(`${convertAmount} ${convertFrom} is approximately ${convertedAmount.toFixed(2)} ${convertTo}`);
+        }
+
+        function calculateRemainingCreditLimit() {
+            const TOTAL_CREDIT_LIMIT = 10000;
+            const EXCHANGE_RATES = {
+                USD: 1,
+                NGN: 1687.41,
+                GHS: 16.49,
+                EUR: 0.93
+            };
+
+            const usedCredit = wallets.reduce((sum, wallet) => {
+                return sum + (wallet.balance / EXCHANGE_RATES[wallet.currency]);
+            }, 0);
+            const remainingCreditLimit = TOTAL_CREDIT_LIMIT - usedCredit;
+            document.getElementById('remaining-amount').innerText = `$${remainingCreditLimit.toFixed(2)} USD`;
+        }
+
+        function switchTab(event, tabId) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => button.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            if (event) event.currentTarget.classList.add('active');
+        }
+
+        function uploadProfileImage() {
+            const fileInput = document.getElementById('uploadImage');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const imageUrl = URL.createObjectURL(file);
+
+                // Store the uploaded image URL in localStorage
+                localStorage.setItem('userProfileImage', imageUrl);
+
+                // Update the image displayed on the page
+                const userImageElement = document.getElementById('userImage');
+                userImageElement.src = imageUrl;
+            }
+        }
+        function triggerFileInput() {
+            document.getElementById('uploadImage').click();
+        }
+        function logout() {
+    // Clear user data from localStorage
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userProfileImage');
+
+    // Redirect the user to the login or welcome screen (adjust the URL as needed)
+            window.location.href = 'signin.html';  // Replace with the correct URL for your login page
+}
+
+        window.onload = function () {
+            calculateRemainingCreditLimit();
+            updateWallets();
+            updateCards();
+            const userProfileImage = localStorage.getItem('userProfileImage');
+            const userImageElement = document.getElementById('userImage');
+
+            if (userProfileImage) {
+                userImageElement.src = userProfileImage;
+            } else {
+                userImageElement.src = 'images/default-avatar.png';  // Default avatar
+            }
+
+            // Update personalized greeting
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.querySelector('#greeting').innerHTML = `Welcome back, ${userName}!`;}
+        };
+    </script>
+</body>
+</html>
+
